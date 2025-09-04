@@ -41,7 +41,7 @@
         }
         .tab-content {
             background-color: #1f2937;
-            padding: 1rem;
+            padding: 1.25rem;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             margin-top: 1.5rem;
@@ -50,7 +50,7 @@
         .input-group {
             display: flex;
             gap: 1rem;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
@@ -124,6 +124,38 @@
             overflow-x: auto;
         }
 
+         /* Progression Tab Styles */
+        .progression-card {
+            background-color: #374151;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            height: 100%;
+        }
+        .chord-box {
+            background-color: #4b5563;
+            padding: 0.75rem;
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .progression-table {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .prog-type-selector button { background-color: #374151; }
+        .prog-type-selector button.active { background-color: #3b82f6; }
+        .scale-suggestions li.selected-scale {
+            background-color: #3b82f6;
+        }
+        .scale-suggestions li.selected-scale, .scale-suggestions li.selected-scale span {
+            color: #ffffff !important;
+        }
+
+
         /* Fretboard Visualizer Styles */
         .visualizer-container {
             background-color: #111827;
@@ -162,6 +194,7 @@
             align-items: center;
             color: #6b7280;
             transition: color 0.3s ease;
+            cursor: pointer;
         }
         .open-string-name.in-scale { color: #e5e7eb; }
         .open-string-name.root { color: #ef4444; }
@@ -193,6 +226,7 @@
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
+            cursor: pointer;
         }
         .fret.nut {
             border-right: 4px solid #2d1a0e;
@@ -209,6 +243,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
+            pointer-events: none; /* So the click goes to the parent fret */
         }
         .note-fixed.in-scale {
             background-color: #3b82f6;
@@ -325,6 +360,10 @@
         <p class="text-center text-sm mb-8 text-gray-500">
             Por: Juan Miguel Rios Redondo
         </p>
+         <div class="flex flex-wrap gap-4 justify-center tabs" id="tabs-container">
+            <button class="tab-button active" data-tab="simple">Pentatónicas y Arpegios</button>
+            <button class="tab-button" data-tab="progression">Progresiones ii-V-I</button>
+        </div>
         
         <!-- Tab 1: Pentatonics & Arpeggios -->
         <div class="tab-content" id="tab-simple">
@@ -352,7 +391,7 @@
                 </table>
                 
                 <div class="mt-8 p-4 bg-gray-800 rounded-lg">
-                    <h3 class="text-xl font-semibold mb-4 text-center">Laboratorio de Melodías y Arpegios</h3>
+                    <h3 class="text-xl font-semibold mb-2 text-center">Laboratorio de Melodías y Arpegios</h3>
                      <div class="input-group">
                         <label for="bpm-slider" class="font-semibold">Metrónomo:</label>
                         <input type="range" id="bpm-slider" min="40" max="300" value="120" class="flex-grow">
@@ -396,6 +435,69 @@
                 </div>
             </div>
         </div>
+
+        <!-- Tab 2: Progressions -->
+        <div class="tab-content hidden" id="tab-progression">
+            <h2 class="text-2xl font-semibold mb-4 text-center">Generador de Progresiones ii-V-I</h2>
+            
+            <div class="input-group">
+                <label for="progression-key">Tonalidad (del 'I'):</label>
+                <select id="progression-key"></select>
+                 <button id="enharmonic-btn-prog" class="action-button">Enarmónico</button>
+                <div class="flex gap-2 p-1 bg-gray-700 rounded-full prog-type-selector">
+                    <button class="action-button active" data-prog-type="major">Mayor</button>
+                    <button class="action-button" data-prog-type="minor">Menor</button>
+                </div>
+            </div>
+            
+            <div id="progression-container" class="progression-table"></div>
+            
+             <div class="mt-8 p-4 bg-gray-800 rounded-lg">
+                     <div class="input-group">
+                        <label for="bpm-slider-prog" class="font-semibold">Metrónomo:</label>
+                        <input type="range" id="bpm-slider-prog" min="40" max="300" value="120" class="flex-grow">
+                        <span id="bpm-value-prog" class="font-bold w-12 text-center bg-gray-700 rounded-md py-1">120 BPM</span>
+                    </div>
+                    <div class="input-group">
+                        <p class="text-sm text-gray-400">Selecciona una escala de la progresión para activar los arpegios.</p>
+                    </div>
+                    <div class="input-group">
+                        <select id="arpeggio-type-select-prog">
+                            <option value="triads">Tríadas</option>
+                            <option value="tetrads">Tétradas</option>
+                        </select>
+                        <select id="arpeggio-select-prog" class="flex-grow" disabled></select>
+                        <button id="add-arpeggio-btn-prog" class="action-button">Agregar/Actualizar Arpegio</button>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="arpeggio-random-order-prog">
+                            <label for="arpeggio-random-order-prog" class="ml-2">Orden Aleatorio</label>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="rhythm-select-prog" class="font-semibold">Ritmo:</label>
+                        <select id="rhythm-select-prog">
+                            <option value="4n">Negra</option>
+                            <option value="8n" selected>Corchea</option>
+                            <option value="16n">Semicorchea</option>
+                        </select>
+                        <label for="random-note-count-prog" class="ml-4">Notas Aleatorias (1-5):</label>
+                        <input type="number" id="random-note-count-prog" min="1" max="5" value="3" class="w-20 text-center">
+                        <button id="add-random-btn-prog" class="action-button bg-yellow-600 hover:bg-yellow-500">Generar Aleatorio</button>
+                    </div>
+                    <div id="generator-output-prog" class="text-center font-mono text-lg p-4 bg-gray-900 rounded-lg min-h-[3rem] flex items-center justify-center mb-4">
+                        <!-- Melody will appear here -->
+                    </div>
+                    <div class="input-group">
+                        <button id="play-melody-btn-prog" class="action-button">Play Melodía</button>
+                        <button id="stop-melody-btn-prog" class="action-button stop-btn">Stop</button>
+                        <button id="clear-melody-btn-prog" class="action-button bg-gray-600 hover:bg-gray-500">Limpiar</button>
+                    </div>
+                </div>
+
+
+            <div class="visualizer-container" id="fretboard-container-progression">
+            </div>
+        </div>
     </div>
 
     <script>
@@ -411,14 +513,14 @@
         };
 
         const KEY_SIGNATURES = {
-            'C':  { type: 'sharp', scale: ['C', 'D', 'E', 'F', 'G', 'A', 'B'] }, 'G':  { type: 'sharp', scale: ['G', 'A', 'B', 'C', 'D', 'E', 'F#'] },
-            'D':  { type: 'sharp', scale: ['D', 'E', 'F#', 'G', 'A', 'B', 'C#'] }, 'A':  { type: 'sharp', scale: ['A', 'B', 'C#', 'D', 'E', 'F#', 'G#'] },
-            'E':  { type: 'sharp', scale: ['E', 'F#', 'G#', 'A', 'B', 'C#', 'D#'] }, 'B':  { type: 'sharp', scale: ['B', 'C#', 'D#', 'E', 'F#', 'G#', 'A#'] },
-            'F#': { type: 'sharp', scale: ['F#', 'G#', 'A#', 'B', 'C#', 'D#', 'E#'] }, 'C#': { type: 'sharp', scale: ['C#', 'D#', 'E#', 'F#', 'G#', 'A#', 'B#'] },
-            'F':  { type: 'flat',  scale: ['F', 'G', 'A', 'Bb', 'C', 'D', 'E'] }, 'Bb': { type: 'flat',  scale: ['Bb', 'C', 'D', 'Eb', 'F', 'G', 'A'] },
-            'Eb': { type: 'flat',  scale: ['Eb', 'F', 'G', 'Ab', 'Bb', 'C', 'D'] }, 'Ab': { type: 'flat',  scale: ['Ab', 'Bb', 'C', 'Db', 'Eb', 'F', 'G'] },
-            'Db': { type: 'flat',  scale: ['Db', 'Eb', 'F', 'Gb', 'Ab', 'Bb', 'C'] }, 'Gb': { type: 'flat',  scale: ['Gb', 'Ab', 'Bb', 'Cb', 'Db', 'Eb', 'F'] },
-            'Cb': { type: 'flat',  scale: ['Cb', 'Db', 'Eb', 'Fb', 'Gb', 'Ab', 'Bb'] }
+            'C':  { type: 'sharp' }, 'G':  { type: 'sharp' },
+            'D':  { type: 'sharp' }, 'A':  { type: 'sharp' },
+            'E':  { type: 'sharp' }, 'B':  { type: 'sharp' },
+            'F#': { type: 'sharp' }, 'C#': { type: 'sharp' },
+            'F':  { type: 'flat'  }, 'Bb': { type: 'flat'  },
+            'Eb': { type: 'flat'  }, 'Ab': { type: 'flat'  },
+            'Db': { type: 'flat'  }, 'Gb': { type: 'flat'  },
+            'Cb': { type: 'flat'  }
         };
         
         const noteNameToIndex = (name) => {
@@ -426,7 +528,7 @@
             return (flatIndex !== -1) ? flatIndex : SHARP_NOTES.indexOf(name);
         };
         
-        const getPreferredNotes = (note, chordType) => {
+        const getPreferredNotes = (note, chordType = '') => {
             const keySig = KEY_SIGNATURES[note];
             if (keySig) return keySig.type === 'flat' ? FLAT_NOTES : SHARP_NOTES;
             if (chordType.includes('m') || chordType.includes('alt') || note.includes('b')) return FLAT_NOTES;
@@ -448,8 +550,9 @@
                 case 0: return 'R'; case 1: return 'b9'; case 2: return '9';
                 case 3: return chordType.includes('m') ? 'b3' : '#9';
                 case 4: return '3'; case 5: return '11';
-                case 6: return chordType.includes('dom') || chordType.includes('alt') ? '#11' : 'b5';
-                case 7: return '5'; case 8: return chordType.includes('m') ? 'b6' : '#5';
+                case 6: return chordType.includes('maj7') || chordType.includes('dom') || chordType.includes('alt') ? '#11' : 'b5';
+                case 7: return '5'; 
+                case 8: return chordType.includes('m') ? 'b6' : '#5';
                 case 9: return chordType.includes('m') ? '6' : 'b13';
                 case 10: return 'b7'; case 11: return '7'; default: return '?';
             }
@@ -496,36 +599,41 @@
             'maj7': 'Mayor (Maj7)', 'm7': 'Menor (m7)', 'dom7': 'Dominante (V7)',
             'm7b5': 'Menor 7b5 (ø)', 'alt': 'Dominante Alterado (V7alt)'
         };
-        const pentatonicToChordRelations = {
+       const pentatonicToChordRelations = {
             'maj7': [
-                { name: 'Menor del 3er grado', pentatonicRoot: (r) => (r + 4) % 12, type: 'minor', logic: 'La mejor opción, excelentes tensiones.' },
-                { name: 'Menor del 7mo grado', pentatonicRoot: (r) => (r + 11) % 12, type: 'minor', logic: 'Introduce el sonido Lidio (#11).' },
-                { name: 'Menor del 6to grado', pentatonicRoot: (r) => (r + 9) % 12, type: 'minor', logic: 'Aporta un sonido bluesy.'},
-                { name: 'Major b6 del 3er grado', pentatonicRoot: (r) => (r + 4) % 12, type: 'majb6', logic: 'Crea un sonido Maj7#5.'},
-                { name: 'm7b5 del #4', pentatonicRoot: (r) => (r + 6) % 12, type: 'm7b5', logic: 'Sonido Lidio con #11 y 13.'}
+                { name: 'Menor del 3er grado', pentatonicRoot: (r) => (r + 4) % 12, type: 'minor', logic: 'Sonido Jónico. Aporta las tensiones 9 y 13 (6).' },
+                { name: 'Menor del 7mo grado', pentatonicRoot: (r) => (r + 11) % 12, type: 'minor', logic: 'Sonido Lidio, añade la tensión característica #11.' },
+                { name: 'Major b6 del 3er grado', pentatonicRoot: (r) => (r + 4) % 12, type: 'majb6', logic: 'Sonido Lidio Aumentado (Maj7#5), con #11 y #5.' },
+                { name: 'm7b5 del #4', pentatonicRoot: (r) => (r + 6) % 12, type: 'm7b5', logic: 'Sonido Lidio con tensiones #11 y 13.' }
             ],
             'm7': [
-                { name: 'Menor de la raíz', pentatonicRoot: (r) => r, type: 'minor', logic: 'La opción más directa y segura.' },
-                { name: 'Menor del 5to grado', pentatonicRoot: (r) => (r + 7) % 12, type: 'minor', logic: 'Sonido Dórico, añade la 9na.' },
-                { name: 'Menor del 2do grado', pentatonicRoot: (r) => (r + 2) % 12, type: 'minor', logic: 'Añade la 9na y la 13ra.'}
+                { name: 'Menor de la raíz', pentatonicRoot: (r) => r, type: 'minor', logic: 'Sonido Eólico/Dórico base. Aporta la tensión 11.' },
+                { name: 'Menor del 5to grado', pentatonicRoot: (r) => (r + 7) % 12, type: 'minor', logic: 'Sonido Dórico, con la 6ta mayor (13) característica.' },
+                { name: 'Menor del 2do grado', pentatonicRoot: (r) => (r + 2) % 12, type: 'minor', logic: 'Sonido Frigio, con la b9 característica.'},
+                { name: 'Menor del 4to grado', pentatonicRoot: (r) => (r + 5) % 12, type: 'minor', logic: 'Sonido Eólico, con la 6ta menor (b13) característica.'},
+                { name: 'Dominante del b7', pentatonicRoot: (r) => (r + 10) % 12, type: 'dom7', logic: 'Sonido Eólico. Aporta las tensiones 9, 11 y b13 (b6).'}
             ],
             'dom7': [
-                { name: 'Menor del 5to grado', pentatonicRoot: (r) => (r + 7) % 12, type: 'minor', logic: 'Opción Mixolidia estándar.' },
-                { name: 'Dominante de la raíz', pentatonicRoot: (r) => r, type: 'dom7', logic: 'La pentatónica de dominante básica.' },
-                { name: 'Menor del 6to grado', pentatonicRoot: (r) => (r + 9) % 12, type: 'minor', logic: 'Sonido muy bluesy.'},
-                { name: 'm7b5 del 3er grado', pentatonicRoot: (r) => (r + 4) % 12, type: 'm7b5', logic: 'Introduce la b13 para un sonido alterado suave.'},
-                { name: 'Majb6 del 2do grado', pentatonicRoot: (r) => (r + 2) % 12, type: 'majb6', logic: 'Sonido Lidio Dominante (#11).'}
+                { name: 'Menor del 5to grado', pentatonicRoot: (r) => (r + 7) % 12, type: 'minor', logic: 'Sonido Mixolidio (contiene la b7). Aporta 9 y 13.' },
+                { name: 'Dominante de la raíz', pentatonicRoot: (r) => r, type: 'dom7', logic: 'Pentatónica Mixolidia básica. Aporta la tensión 9.' },
+                { name: 'Menor del 6to grado', pentatonicRoot: (r) => (r + 9) % 12, type: 'minor', logic: 'Sonido Mixolidio b13, con un color bluesy.'},
+                { name: 'm7b5 del 3er grado', pentatonicRoot: (r) => (r + 4) % 12, type: 'm7b5', logic: 'Sonido Alterado. Aporta las tensiones b9 y #9.'},
+                { name: 'Majb6 del 2do grado', pentatonicRoot: (r) => (r + 2) % 12, type: 'majb6', logic: 'Sonido Mixolidio #11 (Lidio b7), con la #11 característica.'},
+                { name: 'Menor de la Raíz', pentatonicRoot: (r) => r, type: 'minor', logic: 'Sonido Blues. Aporta la b3 (#9) y la 11.'},
+                { name: 'Dominante del b5', pentatonicRoot: (r) => (r + 6) % 12, type: 'dom7', logic: 'Opción de Tritono, sonido alterado (b9, #11, b13).'},
             ],
             'm7b5': [
-                { name: 'Menor del b3', pentatonicRoot: (r) => (r + 3) % 12, type: 'minor', logic: 'Una de las opciones preferidas en jazz.' },
-                { name: 'm7b5 de la raíz', pentatonicRoot: (r) => r, type: 'm7b5', logic: 'La escala más directa para el acorde.'},
-                { name: 'Dominante del b6', pentatonicRoot: (r) => (r + 8) % 12, type: 'dom7', logic: 'Genera 9 y 13 sobre el acorde.'},
+                { name: 'Menor del b3', pentatonicRoot: (r) => (r + 3) % 12, type: 'minor', logic: 'Sonido Locrio (con b5 y b2/b9). Aporta la tensión b13.' },
+                { name: 'm7b5 de la raíz', pentatonicRoot: (r) => r, type: 'm7b5', logic: 'La escala más directa (Locria). Aporta la tensión 11.'},
+                { name: 'Dominante del b6', pentatonicRoot: (r) => (r + 8) % 12, type: 'dom7', logic: 'Aporta la tensión b13.'},
+                { name: 'Menor del b7', pentatonicRoot: (r) => (r + 10) % 12, type: 'minor', logic: 'Sonido Locrio. Aporta b9, 11 y b13.'},
+                { name: 'Majb6 del b7', pentatonicRoot: (r) => (r + 10) % 12, type: 'majb6', logic: 'Sonido Locrio ♮2. Aporta las tensiones 9 y 11.'}
             ],
             'alt': [
-                { name: 'Menor del #9', pentatonicRoot: (r) => (r + 3) % 12, type: 'minor', logic: 'Cubre todas las alteraciones importantes.' },
-                { name: 'Dominante del b5', pentatonicRoot: (r) => (r + 6) % 12, type: 'dom7', logic: 'Opción de tritono, muy potente.' },
-                { name: 'Major b6 del b6', pentatonicRoot: (r) => (r + 8) % 12, type: 'majb6', logic: 'Sonido avanzado con #9 y b13.'},
-                { name: 'm7b5 del b7', pentatonicRoot: (r) => (r + 10) % 12, type: 'm7b5', logic: 'Cubre b9, #9, y #5.'}
+                { name: 'Menor del #9 (b3)', pentatonicRoot: (r) => (r + 3) % 12, type: 'minor', logic: 'Sonido Alterado. Cubre b9, #9, #11 y b13.' },
+                { name: 'Dominante del b5', pentatonicRoot: (r) => (r + 6) % 12, type: 'dom7', logic: 'Opción de Tritono. Cubre b9, #11 y b13.' },
+                { name: 'm7b5 del b7', pentatonicRoot: (r) => (r + 10) % 12, type: 'm7b5', logic: 'Cubre las tensiones b9, #9, #11 y b13 (#5).'},
+                { name: 'Majb6 del b6', pentatonicRoot: (r) => (r + 8) % 12, type: 'majb6', logic: 'Sonido Alterado. Cubre las tensiones #9, #11 y b13(#5).'}
             ]
         };
         const guitarTuning = [4, 9, 2, 7, 11, 4]; // E A D G B e
@@ -638,26 +746,31 @@
             envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.8 },
             modulationEnvelope: { attack: 0.01, decay: 0.15, sustain: 0.1, release: 0.2 }
         }).connect(reverb);
+        const chordSynth = new Tone.PolySynth(Tone.FMSynth).connect(reverb);
         const stopPlayback = () => { if(Tone.Transport.state === 'started') {Tone.Transport.stop();} Tone.Transport.cancel(); };
         
-        let randomMelodyPart = [];
-        let arpeggioMelodyPart = [];
+        // State for melody labs
+        const melodyLabs = {
+            'simple': { randomPart: [], arpeggioPart: [] },
+            'prog': { randomPart: [], arpeggioPart: [] }
+        };
+        let progressionUseFlats = false;
+        let currentProgressionType = 'major';
+
 
         // --- DOM Elements ---
+        // Simple Tab
         const rootNoteSelect = document.getElementById('root-note');
         const chordTypeSelect = document.getElementById('chord-type');
         const tableBody = document.getElementById('scale-table-body');
-        const simpleModeContent = document.getElementById('simple-mode-content');
-        const arpeggioTypeSelect = document.getElementById('arpeggio-type-select');
-        const arpeggioSelect = document.getElementById('arpeggio-select');
-        const bpmSlider = document.getElementById('bpm-slider');
-        const bpmValue = document.getElementById('bpm-value');
-        const rhythmSelect = document.getElementById('rhythm-select');
-        const generatorOutput = document.getElementById('generator-output');
-
+        
+        // Progression Tab
+        const progressionKeySelect = document.getElementById('progression-key');
+        const progressionContainer = document.getElementById('progression-container');
 
         const createFretboard = (containerId, numFrets = 17) => {
             const container = document.getElementById(containerId);
+            if (!container) return;
             container.innerHTML = ''; 
 
             const area = document.createElement('div');
@@ -668,10 +781,11 @@
 
             const openStringsContainer = document.createElement('div');
             openStringsContainer.className = 'open-strings';
-            ['E', 'B', 'G', 'D', 'A', 'E'].forEach(noteName => {
+            ['E', 'B', 'G', 'D', 'A', 'E'].forEach((noteName, i) => {
                 const nameDiv = document.createElement('div');
                 nameDiv.className = 'open-string-name';
                 nameDiv.textContent = noteName;
+                nameDiv.dataset.note = noteName;
                 openStringsContainer.appendChild(nameDiv);
             });
             content.appendChild(openStringsContainer);
@@ -694,10 +808,11 @@
                 for (let i = 0; i < numFrets; i++) {
                     const fret = document.createElement('div');
                     fret.className = 'fret';
+                    const noteIndex = (openNoteIndex + i + 1) % 12;
+                    fret.dataset.note = SHARP_NOTES[noteIndex];
                     
                     const noteFixed = document.createElement('div');
                     noteFixed.className = 'note-fixed';
-                    const noteIndex = (openNoteIndex + i + 1) % 12;
                     noteFixed.textContent = SHARP_NOTES[noteIndex];
                     fret.appendChild(noteFixed);
 
@@ -725,23 +840,17 @@
             content.appendChild(wrapper);
             area.appendChild(content);
 
-            // Add Fret Numbers
             const fretNumbersContainer = document.createElement('div');
             fretNumbersContainer.className = 'fret-numbers';
             const numbers = { 3: '3', 5: '5', 7: '7', 9: '9', 12: '12', 15: '15' };
-
-            // Empty div for the nut space
             const nutSpacer = document.createElement('div');
             nutSpacer.style.width = '10px'; 
             nutSpacer.style.flexShrink = '0';
             fretNumbersContainer.appendChild(nutSpacer);
-
             for (let i = 1; i <= numFrets; i++) {
                 const numDiv = document.createElement('div');
                 numDiv.className = 'fret-number';
-                if (numbers[i]) {
-                    numDiv.textContent = numbers[i];
-                }
+                if (numbers[i]) numDiv.textContent = numbers[i];
                 fretNumbersContainer.appendChild(numDiv);
             }
             area.appendChild(fretNumbersContainer);
@@ -757,13 +866,14 @@
 
             for (let string = 0; string < 6; string++) {
                 const openNoteIndex = reversedTuning[string];
-                if (scaleNoteIndices.includes(openNoteIndex % 12)) {
-                    const openStringLabel = document.querySelector(`#${containerId} .open-string-name:nth-child(${string + 1})`);
-                    if (openStringLabel) {
+                const openStringLabel = document.querySelector(`#${containerId} .open-string-name:nth-child(${string + 1})`);
+                 if(openStringLabel) {
+                    openStringLabel.dataset.note = preferredNotes[openNoteIndex];
+                    if (scaleNoteIndices.includes(openNoteIndex % 12)) {
                         openStringLabel.classList.add('in-scale');
                         if (openNoteIndex % 12 === rootNoteIndex) openStringLabel.classList.add('root');
                     }
-                }
+                 }
                 
                 const stringDiv = document.querySelector(`#${containerId} .fretboard .string:nth-child(${string + 1})`);
                 if (!stringDiv) continue;
@@ -774,6 +884,7 @@
                     const noteEl = fretDiv.querySelector('.note-fixed');
                     if (noteEl) {
                        noteEl.textContent = preferredNotes[currentNoteIndex];
+                       fretDiv.dataset.note = preferredNotes[currentNoteIndex];
                        if (scaleNoteIndices.includes(currentNoteIndex)) {
                            noteEl.classList.add('in-scale');
                            if (currentNoteIndex === rootNoteIndex) noteEl.classList.add('root');
@@ -786,18 +897,12 @@
         const renderSimpleMode = () => {
             const rootNote = rootNoteSelect.value;
             const chordType = chordTypeSelect.value;
-            if (!rootNote || !chordType) {
-                simpleModeContent.classList.add('hidden');
-                return;
-            }
-            simpleModeContent.classList.remove('hidden');
-            tableBody.innerHTML = '';
-            const relations = pentatonicToChordRelations[chordType] || [];
             const preferredNotes = getPreferredNotes(rootNote, chordType);
-            relations.forEach(rel => {
+            tableBody.innerHTML = '';
+            
+            (pentatonicToChordRelations[chordType] || []).forEach(rel => {
                 const pentatonicRootIndex = rel.pentatonicRoot(noteNameToIndex(rootNote));
                 const pentatonicRoot = preferredNotes[pentatonicRootIndex];
-                
                 let pentatonicNotes = pentatonicFormulas[rel.type].map(interval => getNoteFromInterval(pentatonicRoot, interval, preferredNotes));
                 const degrees = pentatonicNotes.map(note => getIntervalName(rootNote, note, chordType));
                 
@@ -816,20 +921,17 @@
                         <div class="font-bold text-lg">${pentatonicRoot} <span class="text-sm text-gray-400">${displayName}</span></div>
                         <div class="text-xs mt-1">${pentatonicNotes.join(', ')}</div>
                     </td>
-                    ${triadasHtml}
-                    ${tetradasHtml}
+                    ${triadasHtml} ${tetradasHtml}
                     <td><div class="example-box">${degrees.join(', ')}</div></td>
                     <td>${rel.logic}</td>
                 `;
                 row.addEventListener('click', (e) => {
                     document.querySelectorAll('#scale-table-body tr').forEach(r => r.classList.remove('selected-row'));
-                    const clickedRow = e.currentTarget;
-                    clickedRow.classList.add('selected-row');
-                    updateFretboardAndArpeggios(clickedRow);
-                     // Clear melody when changing selected scale
-                    randomMelodyPart = [];
-                    arpeggioMelodyPart = [];
-                    updateMelodyDisplay();
+                    e.currentTarget.classList.add('selected-row');
+                    updateFretboardAndArpeggios(e.currentTarget);
+                    melodyLabs.simple.randomPart = [];
+                    melodyLabs.simple.arpeggioPart = [];
+                    updateMelodyDisplay('simple');
                 });
                 tableBody.appendChild(row);
             });
@@ -842,181 +944,299 @@
             const hasSharp = currentNotes.some(n => n.includes('#') && !n.includes('b'));
             const currentPreferred = hasSharp ? SHARP_NOTES : FLAT_NOTES;
             updateFretboard('fretboard-container-simple', currentRoot, currentNotes, currentPreferred);
-            populateArpeggioSelector();
+            populateArpeggioSelector('simple');
         };
 
         const fillSelects = () => {
             Object.keys(KEY_SIGNATURES).forEach(note => {
-                rootNoteSelect.innerHTML += `<option value="${note}">${note}</option>`;
+                const option = `<option value="${note}">${note}</option>`;
+                rootNoteSelect.innerHTML += option;
+                progressionKeySelect.innerHTML += option;
             });
             Object.keys(chordTypes).forEach(type => {
                 chordTypeSelect.innerHTML += `<option value="${type}">${chordTypes[type]}</option>`;
             });
             rootNoteSelect.value = 'C';
             chordTypeSelect.value = 'maj7';
+            progressionKeySelect.value = 'C';
         };
 
         const setupEventListeners = () => {
-            const allButtons = document.querySelectorAll('button, select');
-            allButtons.forEach(btn => {
-                btn.addEventListener('click', async () => {
-                    if (!isToneStarted) {
-                        await Tone.start();
-                        isToneStarted = true;
-                    }
-                });
+            document.querySelectorAll('button, select').forEach(btn => {
+                btn.addEventListener('click', async () => { if (!isToneStarted) { await Tone.start(); isToneStarted = true; } });
             });
 
             rootNoteSelect.addEventListener('change', () => {
-                randomMelodyPart = [];
-                arpeggioMelodyPart = [];
-                updateMelodyDisplay();
-                renderSimpleMode();
+                melodyLabs.simple.randomPart = []; melodyLabs.simple.arpeggioPart = [];
+                updateMelodyDisplay('simple'); renderSimpleMode();
             });
             chordTypeSelect.addEventListener('change', () => {
-                randomMelodyPart = [];
-                arpeggioMelodyPart = [];
-                updateMelodyDisplay();
-                renderSimpleMode();
+                melodyLabs.simple.randomPart = []; melodyLabs.simple.arpeggioPart = [];
+                updateMelodyDisplay('simple'); renderSimpleMode();
             });
 
-            document.getElementById('stop-melody-btn').addEventListener('click', stopPlayback);
-            
-            document.getElementById('enharmonic-btn').addEventListener('click', () => {
-                const selectedRow = document.querySelector('#scale-table-body .selected-row');
-                if (!selectedRow) return;
-
-                const currentNotes = selectedRow.dataset.notes.split(',').map(note => ENHARMONIC_MAP[note] || note);
-                const currentRoot = ENHARMONIC_MAP[selectedRow.dataset.root] || selectedRow.dataset.root;
-                const type = selectedRow.dataset.type;
-
-                selectedRow.dataset.notes = currentNotes.join(',');
-                selectedRow.dataset.root = currentRoot;
-
-                const displayName = PENTATONIC_DISPLAY_NAMES[type] || type;
-                selectedRow.querySelector('.font-bold').innerHTML = `${currentRoot} <span class="text-sm text-gray-400">${displayName}</span>`;
-                selectedRow.querySelector('.text-xs').textContent = currentNotes.join(', ');
-                
-                const arpeggios = getArpeggiosForPentatonic(currentNotes, type);
-                const cells = selectedRow.getElementsByTagName('td');
-                cells[1].dataset.arpeggios = JSON.stringify(arpeggios.triadas);
-                cells[1].querySelector('.example-box').textContent = arpeggios.triadas.join('\n');
-                cells[2].dataset.arpeggios = JSON.stringify(arpeggios.tetradas);
-                cells[2].querySelector('.example-box').textContent = arpeggios.tetradas.join('\n');
-                
-                updateFretboardAndArpeggios(selectedRow);
+            document.getElementById('enharmonic-btn').addEventListener('click', () => handleEnharmonicClick('simple'));
+            document.getElementById('enharmonic-btn-prog').addEventListener('click', () => {
+                const selectedLi = document.querySelector('#progression-container li.selected-scale');
+                if (selectedLi) {
+                    handleSingleLiEnharmonic(selectedLi);
+                } else {
+                    progressionUseFlats = !progressionUseFlats;
+                    renderProgression();
+                }
             });
             
-            // Metronome Listener
+            setupMelodyLab('simple');
+            setupMelodyLab('prog');
+            
+            // Progression Listeners
+            progressionKeySelect.addEventListener('change', renderProgression);
+             document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+                    document.getElementById(`tab-${button.dataset.tab}`).classList.remove('hidden');
+                });
+            });
+
+            document.querySelectorAll('.prog-type-selector button').forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.prog-type-selector button').forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+                    currentProgressionType = button.dataset.progType;
+                    renderProgression();
+                });
+            });
+
+            progressionContainer.addEventListener('click', (e) => {
+                const targetLi = e.target.closest('li');
+                if (targetLi) {
+                    progressionContainer.querySelectorAll('li').forEach(li => li.classList.remove('selected-scale'));
+                    targetLi.classList.add('selected-scale');
+                    const root = targetLi.dataset.root;
+                    const notes = targetLi.dataset.notes.split(',');
+                    const preferredType = targetLi.dataset.preferred;
+                    const preferredNotes = preferredType === 'sharp' ? SHARP_NOTES : FLAT_NOTES;
+                    updateFretboard('fretboard-container-progression', root, notes, preferredNotes);
+                    populateArpeggioSelector('prog');
+                    document.getElementById('arpeggio-select-prog').disabled = false;
+
+                }
+            });
+
+            // Interactive Fretboard
+            document.getElementById('fretboard-container-simple').addEventListener('click', (e) => handleFretboardClick(e, 'simple'));
+            document.getElementById('fretboard-container-progression').addEventListener('click', (e) => handleFretboardClick(e, 'prog'));
+        };
+
+        function handleFretboardClick(e, labKey) {
+            if (e.target.classList.contains('fret') || e.target.classList.contains('open-string-name')) {
+                const note = e.target.dataset.note;
+                if(note) {
+                    melodySynth.triggerAttackRelease(note + '4', '8n');
+                    melodyLabs[labKey].randomPart.push(note);
+                    updateMelodyDisplay(labKey);
+                }
+            }
+        }
+
+        function handleSingleLiEnharmonic(li) {
+            const currentNotes = li.dataset.notes.split(',');
+            const newNotes = currentNotes.map(note => ENHARMONIC_MAP[note] || note);
+            const currentRoot = li.dataset.root;
+            const newRoot = ENHARMONIC_MAP[currentRoot] || currentRoot;
+            const newPreferredType = li.dataset.preferred === 'sharp' ? 'flat' : 'sharp';
+            const newPreferredNotes = newPreferredType === 'sharp' ? SHARP_NOTES : FLAT_NOTES;
+            const type = li.dataset.type;
+            
+            li.dataset.notes = newNotes.join(',');
+            li.dataset.root = newRoot;
+            li.dataset.preferred = newPreferredType;
+
+            li.innerHTML = `<span class="text-blue-400 font-semibold">${newRoot} ${PENTATONIC_DISPLAY_NAMES[type] || type}</span>`;
+
+            updateFretboard('fretboard-container-progression', newRoot, newNotes, newPreferredNotes);
+            populateArpeggioSelector('prog');
+        }
+
+
+        function handleEnharmonicClick(labKey) {
+            const selectedRow = document.querySelector('#scale-table-body .selected-row');
+            if (!selectedRow) return;
+
+            const currentNotes = selectedRow.dataset.notes.split(',').map(note => ENHARMONIC_MAP[note] || note);
+            const currentRoot = ENHARMONIC_MAP[selectedRow.dataset.root] || selectedRow.dataset.root;
+            const type = selectedRow.dataset.type;
+
+            selectedRow.dataset.notes = currentNotes.join(',');
+            selectedRow.dataset.root = currentRoot;
+
+            const displayName = PENTATONIC_DISPLAY_NAMES[type] || type;
+            selectedRow.querySelector('.font-bold').innerHTML = `${currentRoot} <span class="text-sm text-gray-400">${displayName}</span>`;
+            selectedRow.querySelector('.text-xs').textContent = currentNotes.join(', ');
+            
+            const arpeggios = getArpeggiosForPentatonic(currentNotes, type);
+            const cells = selectedRow.getElementsByTagName('td');
+            cells[1].dataset.arpeggios = JSON.stringify(arpeggios.triadas);
+            cells[1].querySelector('.example-box').textContent = arpeggios.triadas.join('\n');
+            cells[2].dataset.arpeggios = JSON.stringify(arpeggios.tetradas);
+            cells[2].querySelector('.example-box').textContent = arpeggios.tetradas.join('\n');
+            
+            updateFretboardAndArpeggios(selectedRow);
+        }
+
+        function setupMelodyLab(labKey) {
+            const suffix = labKey === 'prog' ? '-prog' : '';
+            const bpmSlider = document.getElementById(`bpm-slider${suffix}`);
+            const bpmValue = document.getElementById(`bpm-value${suffix}`);
+            const arpeggioTypeSelect = document.getElementById(`arpeggio-type-select${suffix}`);
+            const addArpeggioBtn = document.getElementById(`add-arpeggio-btn${suffix}`);
+            const addRandomBtn = document.getElementById(`add-random-btn${suffix}`);
+            const playMelodyBtn = document.getElementById(`play-melody-btn${suffix}`);
+            const stopBtn = document.getElementById(`stop-melody-btn${suffix}`);
+            const clearBtn = document.getElementById(`clear-melody-btn${suffix}`);
+            
             bpmSlider.addEventListener('input', (e) => {
                 const newBpm = e.target.value;
                 Tone.Transport.bpm.value = newBpm;
                 bpmValue.textContent = `${newBpm} BPM`;
             });
+            Tone.Transport.bpm.value = bpmSlider.value;
 
-            // Generator Logic
-            arpeggioTypeSelect.addEventListener('change', populateArpeggioSelector);
-            document.getElementById('add-arpeggio-btn').addEventListener('click', addArpeggioToMelody);
-            document.getElementById('play-melody-btn').addEventListener('click', playMelody);
-            document.getElementById('play-arpeggios-btn').addEventListener('click', playArpeggios);
-            document.getElementById('clear-melody-btn').addEventListener('click', () => {
-                randomMelodyPart = [];
-                arpeggioMelodyPart = [];
-                updateMelodyDisplay();
+            arpeggioTypeSelect.addEventListener('change', () => populateArpeggioSelector(labKey));
+            addArpeggioBtn.addEventListener('click', () => addArpeggioToMelody(labKey));
+            addRandomBtn.addEventListener('click', () => addRandomNotesToMelody(labKey));
+            playMelodyBtn.addEventListener('click', () => playMelody(labKey));
+            stopBtn.addEventListener('click', stopPlayback);
+            clearBtn.addEventListener('click', () => {
+                melodyLabs[labKey].randomPart = [];
+                melodyLabs[labKey].arpeggioPart = [];
+                updateMelodyDisplay(labKey);
             });
-            document.getElementById('add-random-btn').addEventListener('click', addRandomNotesToMelody);
-        };
-
-        function populateArpeggioSelector() {
-            const selectedRow = document.querySelector('#scale-table-body .selected-row');
-            arpeggioSelect.innerHTML = '';
-            if (!selectedRow) return;
-
-            const type = arpeggioTypeSelect.value;
-            const cellIndex = type === 'triads' ? 1 : 2;
-            const arpeggioCell = selectedRow.cells[cellIndex];
-            
-            if (arpeggioCell && arpeggioCell.dataset.arpeggios) {
-                const arpeggios = JSON.parse(arpeggioCell.dataset.arpeggios);
-                arpeggios.forEach(arpString => {
-                    const option = document.createElement('option');
-                    option.value = arpString;
-                    option.textContent = arpString.trim();
-                    arpeggioSelect.appendChild(option);
-                });
+            if(labKey === 'simple') {
+                 document.getElementById('play-arpeggios-btn').addEventListener('click', () => playArpeggios('simple'));
             }
         }
         
-        function updateMelodyDisplay() {
-            const fullMelody = [...randomMelodyPart, ...arpeggioMelodyPart];
-            if (fullMelody.length > 0) {
-                generatorOutput.textContent = fullMelody.join(' - ');
-            } else {
-                generatorOutput.textContent = '';
-            }
+        function updateMelodyDisplay(labKey) {
+            const suffix = labKey === 'prog' ? '-prog' : '';
+            const generatorOutput = document.getElementById(`generator-output${suffix}`);
+            const fullMelody = [...melodyLabs[labKey].randomPart, ...melodyLabs[labKey].arpeggioPart];
+            generatorOutput.textContent = fullMelody.length > 0 ? fullMelody.join(' - ') : '';
         }
 
-        function addArpeggioToMelody() {
-            const arpString = arpeggioSelect.value;
+        function populateArpeggioSelector(labKey) {
+            const suffix = labKey === 'prog' ? '-prog' : '';
+            const arpeggioSelect = document.getElementById(`arpeggio-select${suffix}`);
+            arpeggioSelect.innerHTML = '';
+            
+            let sourceElement;
+            if (labKey === 'simple') {
+                sourceElement = document.querySelector('#scale-table-body .selected-row');
+            } else { // prog
+                sourceElement = document.querySelector('#progression-container li.selected-scale');
+            }
+            if (!sourceElement) {
+                if(labKey === 'prog') arpeggioSelect.disabled = true;
+                return;
+            }
+
+            const type = document.getElementById(`arpeggio-type-select${suffix}`).value;
+            const pentatonicNotes = sourceElement.dataset.notes.split(',');
+            const pentatonicType = sourceElement.dataset.type;
+            
+            const arpeggios = getArpeggiosForPentatonic(pentatonicNotes, pentatonicType);
+            const list = type === 'triads' ? arpeggios.triadas : arpeggios.tetradas;
+            
+            list.forEach(arpString => {
+                const option = document.createElement('option');
+                option.value = arpString;
+                option.textContent = arpString.trim();
+                arpeggioSelect.appendChild(option);
+            });
+        }
+        
+        function addArpeggioToMelody(labKey) {
+            const suffix = labKey === 'prog' ? '-prog' : '';
+            const arpString = document.getElementById(`arpeggio-select${suffix}`).value;
             if (!arpString) return;
             
             let arpeggioNotes = arpString.split(':')[1].trim().split(', ');
-            const randomOrderCheckbox = document.getElementById('arpeggio-random-order');
-            
-            if(randomOrderCheckbox.checked) {
-                arpeggioNotes = [...arpeggioNotes].sort(() => 0.5 - Math.random());
+            if(document.getElementById(`arpeggio-random-order${suffix}`).checked) {
+                arpeggioNotes.sort(() => 0.5 - Math.random());
             }
 
-            arpeggioMelodyPart = arpeggioNotes;
-            updateMelodyDisplay();
+            melodyLabs[labKey].arpeggioPart = arpeggioNotes;
+            updateMelodyDisplay(labKey);
         }
 
-        function playMelody() {
+        function addRandomNotesToMelody(labKey) {
+            const suffix = labKey === 'prog' ? '-prog' : '';
+            const generatorOutput = document.getElementById(`generator-output${suffix}`);
+
+            let sourceElement;
+            if(labKey === 'simple') {
+                sourceElement = document.querySelector('#scale-table-body .selected-row');
+            } else {
+                sourceElement = document.querySelector('#progression-container li.selected-scale');
+            }
+
+            if (!sourceElement) {
+                generatorOutput.textContent = "Selecciona una escala primero.";
+                setTimeout(() => { if (generatorOutput.textContent.includes("Selecciona")) generatorOutput.textContent = "" }, 2000);
+                return;
+            }
+
+            const scaleNotes = sourceElement.dataset.notes.split(',');
+            const count = parseInt(document.getElementById(`random-note-count${suffix}`).value, 10);
+            
+            if (isNaN(count) || count < 1 || count > 5) {
+                generatorOutput.textContent = "Número de notas debe ser entre 1 y 5.";
+                setTimeout(() => { if (generatorOutput.textContent.includes("Número")) generatorOutput.textContent = "" }, 2000);
+                return;
+            }
+
+            const shuffled = [...scaleNotes].sort(() => 0.5 - Math.random());
+            melodyLabs[labKey].randomPart = shuffled.slice(0, count);
+            updateMelodyDisplay(labKey);
+        }
+
+        function playMelody(labKey) {
             stopPlayback();
-            const fullMelody = [...randomMelodyPart, ...arpeggioMelodyPart];
+            const fullMelody = [...melodyLabs[labKey].randomPart, ...melodyLabs[labKey].arpeggioPart];
             if (fullMelody.length === 0) return;
 
+            const suffix = labKey === 'prog' ? '-prog' : '';
+            const generatorOutput = document.getElementById(`generator-output${suffix}`);
+            const rhythm = document.getElementById(`rhythm-select${suffix}`).value;
+
             const melodyString = fullMelody.join(' - ');
-            const notes = fullMelody;
-            const notesWithOctaves = assignOctaves(notes);
-            const rhythm = rhythmSelect.value;
+            const notesWithOctaves = assignOctaves(fullMelody);
             
-            // Re-render the output with spans for highlighting
             generatorOutput.innerHTML = '';
-            notes.forEach((note, index) => {
+            fullMelody.forEach((note, index) => {
                 const noteSpan = document.createElement('span');
-                noteSpan.id = `melody-note-${index}`;
+                noteSpan.id = `melody-note-${labKey}-${index}`;
                 noteSpan.className = 'note-span';
                 noteSpan.textContent = note;
                 generatorOutput.appendChild(noteSpan);
-
-                if (index < notes.length - 1) {
-                    const separator = document.createTextNode(' - ');
-                    generatorOutput.appendChild(separator);
-                }
+                if (index < fullMelody.length - 1) generatorOutput.appendChild(document.createTextNode(' - '));
             });
              
-            // Create an array of indices to pass to the sequence
-            const indices = Array.from(Array(notes.length).keys());
+            const indices = Array.from(Array(fullMelody.length).keys());
 
             const sequence = new Tone.Sequence((time, index) => {
-                const note = notes[index];
+                const note = fullMelody[index];
                 const noteWithOctave = notesWithOctaves[index];
                 melodySynth.triggerAttackRelease(noteWithOctave, rhythm, time);
                 
-                // Highlight fretboard
                 Tone.Draw.schedule(() => {
                     highlightNote(note, 'add', Tone.Time(rhythm).toMilliseconds());
-                }, time);
-
-                // Highlight text span
-                Tone.Draw.schedule(() => {
-                    const noteSpan = document.getElementById(`melody-note-${index}`);
+                    const noteSpan = document.getElementById(`melody-note-${labKey}-${index}`);
                     if (noteSpan) {
                         noteSpan.classList.add('playing');
-                        setTimeout(() => {
-                            noteSpan.classList.remove('playing');
-                        }, Tone.Time(rhythm).toMilliseconds());
+                        setTimeout(() => noteSpan.classList.remove('playing'), Tone.Time(rhythm).toMilliseconds());
                     }
                 }, time);
 
@@ -1024,12 +1244,9 @@
             
             sequence.loop = false;
             sequence.start(0);
-
-            const duration = notes.length * Tone.Time(rhythm).toSeconds();
-            // Add a small buffer to ensure the last note finishes
+            const duration = fullMelody.length * Tone.Time(rhythm).toSeconds();
             Tone.Transport.scheduleOnce(() => {
                 stopPlayback();
-                 // After playback, restore the simple text content
                 generatorOutput.textContent = melodyString;
             }, duration + 0.1);
 
@@ -1041,20 +1258,17 @@
             const selectedRow = document.querySelector('#scale-table-body .selected-row');
             if (!selectedRow) return;
 
-            const type = arpeggioTypeSelect.value;
+            const type = document.getElementById('arpeggio-type-select').value;
             const cellIndex = type === 'triads' ? 1 : 2;
             const arpeggioCell = selectedRow.cells[cellIndex];
             if (!arpeggioCell || !arpeggioCell.dataset.arpeggios) return;
 
             const arpeggiosRaw = JSON.parse(arpeggioCell.dataset.arpeggios);
             const arpeggiosNotes = arpeggiosRaw.map(arp => arp.split(':')[1].trim().split(', '));
-            const rhythm = rhythmSelect.value;
+            const rhythm = document.getElementById('rhythm-select').value;
             
             const sequenceNotes = [];
-            arpeggiosNotes.forEach(arp => {
-                sequenceNotes.push(...arp);
-                sequenceNotes.push(null); // Rest between arpeggios
-            });
+            arpeggiosNotes.forEach(arp => sequenceNotes.push(...arp, null));
 
             const notesWithOctaves = assignOctaves(sequenceNotes);
             const indices = Array.from(Array(sequenceNotes.length).keys());
@@ -1064,52 +1278,21 @@
                 if (noteWithOctave) {
                     const noteName = sequenceNotes[index];
                     melodySynth.triggerAttackRelease(noteWithOctave, rhythm, time);
-                    Tone.Draw.schedule(() => {
-                        highlightNote(noteName, 'add', Tone.Time(rhythm).toMilliseconds());
-                    }, time);
+                    Tone.Draw.schedule(() => highlightNote(noteName, 'add', Tone.Time(rhythm).toMilliseconds()), time);
                 }
             }, indices, rhythm);
             sequence.loop = false;
             sequence.start(0);
 
             const duration = sequenceNotes.length * Tone.Time(rhythm).toSeconds();
-            // Add a small buffer to ensure the last note finishes
-            Tone.Transport.scheduleOnce(() => {
-                stopPlayback();
-            }, duration + 0.1);
-
+            Tone.Transport.scheduleOnce(() => stopPlayback(), duration + 0.1);
             Tone.Transport.start();
         }
 
-        function addRandomNotesToMelody() {
-            const selectedRow = document.querySelector('#scale-table-body .selected-row');
-            if (!selectedRow) {
-                generatorOutput.textContent = "Selecciona una escala primero.";
-                setTimeout(() => { if (generatorOutput.textContent === "Selecciona una escala primero.") generatorOutput.textContent = "" }, 2000);
-                return;
-            }
-
-            const scaleNotes = selectedRow.dataset.notes.split(',');
-            const count = parseInt(document.getElementById('random-note-count').value, 10);
-            
-            if (isNaN(count) || count < 1 || count > 5) {
-                generatorOutput.textContent = "Número de notas debe ser entre 1 y 5.";
-                setTimeout(() => { if (generatorOutput.textContent === "Número de notas debe ser entre 1 y 5.") generatorOutput.textContent = "" }, 2000);
-                return;
-            }
-
-            const shuffled = [...scaleNotes].sort(() => 0.5 - Math.random());
-            randomMelodyPart = shuffled.slice(0, count);
-            updateMelodyDisplay();
-        }
-
         function highlightNote(note, action, duration) {
-            const noteElements = document.querySelectorAll(`#fretboard-container-simple .note-fixed`);
-            const openStringElements = document.querySelectorAll(`#fretboard-container-simple .open-string-name`);
-            const allElements = [...noteElements, ...openStringElements];
-
+            const allElements = document.querySelectorAll(`.note-fixed, .open-string-name`);
             allElements.forEach(el => {
-                if (el.textContent === note) {
+                if (el.textContent === note || el.dataset.note === note) {
                     if (action === 'add') {
                         el.classList.add('playing');
                         setTimeout(() => el.classList.remove('playing'), duration);
@@ -1120,11 +1303,61 @@
             });
         }
         
+         // --- PROGRESSION LOGIC ---
+        function renderProgression() {
+            const key = progressionKeySelect.value;
+            const preferredKeyNotes = progressionUseFlats ? FLAT_NOTES : getPreferredNotes(key);
+            let progressionChords;
+            
+            if (currentProgressionType === 'major') {
+                 progressionChords = [
+                    { name: `${getNoteFromInterval(key, 2, preferredKeyNotes)}m7`, type: 'm7', root: getNoteFromInterval(key, 2, preferredKeyNotes) }, 
+                    { name: `${getNoteFromInterval(key, 7, preferredKeyNotes)}7`, type: 'dom7', root: getNoteFromInterval(key, 7, preferredKeyNotes) }, 
+                    { name: `${key}maj7`, type: 'maj7', root: key }
+                 ];
+            } else { // minor
+                 progressionChords = [
+                    { name: `${getNoteFromInterval(key, 2, preferredKeyNotes)}m7(b5)`, type: 'm7b5', root: getNoteFromInterval(key, 2, preferredKeyNotes) }, 
+                    { name: `${getNoteFromInterval(key, 7, preferredKeyNotes)}7alt`, type: 'alt', root: getNoteFromInterval(key, 7, preferredKeyNotes) }, 
+                    { name: `${key}m7`, type: 'm7', root: key }
+                 ];
+            }
+
+            progressionContainer.innerHTML = '';
+            progressionChords.forEach(chord => {
+                const chordRootNotes = progressionUseFlats ? FLAT_NOTES : getPreferredNotes(chord.root, chord.type);
+                let suggestionsHtml = (pentatonicToChordRelations[chord.type] || []).map(rel => {
+                    const pRootIndex = rel.pentatonicRoot(noteNameToIndex(chord.root));
+                    const pRoot = chordRootNotes[pRootIndex];
+                    const pNotes = pentatonicFormulas[rel.type].map(i => getNoteFromInterval(pRoot, i, chordRootNotes)).join(',');
+                    const preferredType = chordRootNotes === SHARP_NOTES ? 'sharp' : 'flat';
+
+                    return `<li class="text-sm cursor-pointer hover:bg-gray-600 p-1 rounded" data-root="${pRoot}" data-type="${rel.type}" data-notes="${pNotes}" data-preferred="${preferredType}">
+                                <span class="text-blue-400 font-semibold">${pRoot} ${PENTATONIC_DISPLAY_NAMES[rel.type] || rel.type}</span>
+                            </li>`;
+                }).join('');
+
+                const column = document.createElement('div');
+                column.className = 'chord-column';
+                column.innerHTML = `
+                    <div class="chord-box">${chord.name}</div>
+                    <div class="progression-card mt-2">
+                        <p class="text-sm font-semibold mb-2">Pentatónicas sugeridas:</p>
+                        <ul class="scale-suggestions space-y-1">${suggestionsHtml}</ul>
+                    </div>`;
+                progressionContainer.appendChild(column);
+            });
+             if (progressionContainer.querySelector('li')) {
+                progressionContainer.querySelector('li').click();
+            }
+        }
+
         // --- START APP ---
         fillSelects();
         createFretboard('fretboard-container-simple');
+        createFretboard('fretboard-container-progression');
         setupEventListeners();
-        Tone.Transport.bpm.value = bpmSlider.value; // Set initial BPM
+        renderProgression();
         renderSimpleMode(); 
     });
     </script>
