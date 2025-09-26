@@ -372,6 +372,20 @@
                 border: 2px solid #1f2937; /* Creates padding around thumb */
             }
         }
+        
+        @media (max-width: 480px) {
+            .fret, .inlay-fret, .fret-number {
+                width: 35px; /* Even smaller for phones */
+            }
+            .note-fixed {
+                width: 16px;
+                height: 16px;
+                font-size: 0.6rem;
+            }
+             .open-string-name {
+                font-size: 0.8rem;
+             }
+        }
 
     </style>
 </head>
@@ -985,6 +999,34 @@
             progressionKeySelect.value = 'C';
         };
 
+        const preventPageScrollOnFretboard = (container) => {
+            let startX = 0;
+            let startY = 0;
+            let isHandling = false;
+
+            container.addEventListener('touchstart', (e) => {
+                startX = e.touches[0].pageX;
+                startY = e.touches[0].pageY;
+                isHandling = true;
+            }, { passive: true });
+
+            container.addEventListener('touchmove', (e) => {
+                if (!isHandling) return;
+                
+                const deltaX = Math.abs(e.touches[0].pageX - startX);
+                const deltaY = Math.abs(e.touches[0].pageY - startY);
+
+                // If horizontal movement is greater, prevent page scroll
+                if (deltaX > deltaY) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+            
+            // Reset on end
+             container.addEventListener('touchend', () => { isHandling = false; });
+             container.addEventListener('touchcancel', () => { isHandling = false; });
+        };
+
         const setupEventListeners = () => {
             document.querySelectorAll('button, select').forEach(btn => {
                 btn.addEventListener('click', async () => { if (!isToneStarted) { await Tone.start(); isToneStarted = true; } });
@@ -1052,6 +1094,10 @@
             // Interactive Fretboard
             document.getElementById('fretboard-container-simple').addEventListener('click', (e) => handleFretboardClick(e, 'simple'));
             document.getElementById('fretboard-container-progression').addEventListener('click', (e) => handleFretboardClick(e, 'prog'));
+
+            // Setup scroll prevention for mobile
+            preventPageScrollOnFretboard(document.getElementById('fretboard-container-simple'));
+            preventPageScrollOnFretboard(document.getElementById('fretboard-container-progression'));
         };
 
         function handleFretboardClick(e, labKey) {
@@ -1387,4 +1433,5 @@
     </script>
 </body>
 </html>
+
 
