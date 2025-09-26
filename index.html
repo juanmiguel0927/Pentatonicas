@@ -164,15 +164,10 @@
             margin-top: 1.5rem;
             width: 100%;
             overflow-x: auto;
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
             text-align: center; /* Center the inline-block fretboard area */
         }
-        .visualizer-container::-webkit-scrollbar {
-             display: none; /* Chrome, Safari, Opera */
-        }
         .fretboard-area {
-            display: inline-flex; /* Changed to inline-flex */
+            display: inline-flex;
             flex-direction: column;
             align-items: flex-start;
             padding: 0 1rem;
@@ -218,7 +213,7 @@
         }
         .string:not(:last-child) { border-bottom: 1px solid #4a2c1a; }
         .fret {
-            width: 50px; /* Increased width */
+            width: 50px;
             height: 100%;
             border-right: 1px solid #a0a0a0;
             position: relative;
@@ -268,7 +263,7 @@
             pointer-events: none;
         }
         .inlay-fret {
-            width: 50px; /* Increased width */
+            width: 50px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -301,7 +296,7 @@
             padding-top: 4px;
         }
         .fret-number {
-            width: 50px; /* Increased width */
+            width: 50px;
             flex-shrink: 0;
             text-align: center;
             font-size: 0.75rem;
@@ -347,6 +342,35 @@
             color: #fef08a;
             text-shadow: 0 0 8px #fef08a;
             transform: scale(1.1);
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .fret, .inlay-fret, .fret-number {
+                width: 40px; /* Reduce fret width on smaller screens */
+            }
+            .note-fixed {
+                width: 18px;
+                height: 18px;
+                font-size: 0.65rem;
+            }
+            .visualizer-container {
+                scrollbar-width: thin; /* Show a thin scrollbar on Firefox */
+                scrollbar-color: #4b5563 #1f2937; /* Scrollbar colors for Firefox */
+            }
+            .visualizer-container::-webkit-scrollbar {
+                display: block; /* Make sure scrollbar is visible */
+                height: 8px; /* Height of the horizontal scrollbar */
+            }
+            .visualizer-container::-webkit-scrollbar-track {
+                background: #1f2937; /* Track color */
+                border-radius: 4px;
+            }
+            .visualizer-container::-webkit-scrollbar-thumb {
+                background-color: #4b5563; /* Thumb color */
+                border-radius: 4px;
+                border: 2px solid #1f2937; /* Creates padding around thumb */
+            }
         }
 
     </style>
