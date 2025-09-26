@@ -165,6 +165,7 @@
             width: 100%;
             overflow-x: auto;
             text-align: center; /* Center the inline-block fretboard area */
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
         }
         .fretboard-area {
             display: inline-flex;
@@ -354,28 +355,11 @@
                 height: 18px;
                 font-size: 0.65rem;
             }
-            .visualizer-container {
-                scrollbar-width: thin; /* Show a thin scrollbar on Firefox */
-                scrollbar-color: #4b5563 #1f2937; /* Scrollbar colors for Firefox */
-            }
-            .visualizer-container::-webkit-scrollbar {
-                display: block; /* Make sure scrollbar is visible */
-                height: 8px; /* Height of the horizontal scrollbar */
-            }
-            .visualizer-container::-webkit-scrollbar-track {
-                background: #1f2937; /* Track color */
-                border-radius: 4px;
-            }
-            .visualizer-container::-webkit-scrollbar-thumb {
-                background-color: #4b5563; /* Thumb color */
-                border-radius: 4px;
-                border: 2px solid #1f2937; /* Creates padding around thumb */
-            }
         }
         
         @media (max-width: 480px) {
             .fret, .inlay-fret, .fret-number {
-                width: 35px; /* Even smaller for phones */
+                width: 32px; /* Even smaller for phones */
             }
             .note-fixed {
                 width: 16px;
@@ -806,7 +790,7 @@
         const progressionKeySelect = document.getElementById('progression-key');
         const progressionContainer = document.getElementById('progression-container');
 
-        const createFretboard = (containerId, numFrets = 17) => {
+        const createFretboard = (containerId, numFrets = 12) => {
             const container = document.getElementById(containerId);
             if (!container) return;
             container.innerHTML = ''; 
@@ -999,34 +983,6 @@
             progressionKeySelect.value = 'C';
         };
 
-        const preventPageScrollOnFretboard = (container) => {
-            let startX = 0;
-            let startY = 0;
-            let isHandling = false;
-
-            container.addEventListener('touchstart', (e) => {
-                startX = e.touches[0].pageX;
-                startY = e.touches[0].pageY;
-                isHandling = true;
-            }, { passive: true });
-
-            container.addEventListener('touchmove', (e) => {
-                if (!isHandling) return;
-                
-                const deltaX = Math.abs(e.touches[0].pageX - startX);
-                const deltaY = Math.abs(e.touches[0].pageY - startY);
-
-                // If horizontal movement is greater, prevent page scroll
-                if (deltaX > deltaY) {
-                    e.preventDefault();
-                }
-            }, { passive: false });
-            
-            // Reset on end
-             container.addEventListener('touchend', () => { isHandling = false; });
-             container.addEventListener('touchcancel', () => { isHandling = false; });
-        };
-
         const setupEventListeners = () => {
             document.querySelectorAll('button, select').forEach(btn => {
                 btn.addEventListener('click', async () => { if (!isToneStarted) { await Tone.start(); isToneStarted = true; } });
@@ -1094,10 +1050,6 @@
             // Interactive Fretboard
             document.getElementById('fretboard-container-simple').addEventListener('click', (e) => handleFretboardClick(e, 'simple'));
             document.getElementById('fretboard-container-progression').addEventListener('click', (e) => handleFretboardClick(e, 'prog'));
-
-            // Setup scroll prevention for mobile
-            preventPageScrollOnFretboard(document.getElementById('fretboard-container-simple'));
-            preventPageScrollOnFretboard(document.getElementById('fretboard-container-progression'));
         };
 
         function handleFretboardClick(e, labKey) {
