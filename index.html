@@ -88,32 +88,41 @@
         .action-button.stop-btn { background-color: #ef4444; }
         .action-button.stop-btn:hover { background-color: #dc2626; }
 
-        /* Table Styles */
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        /* Card Styles */
+        .scale-card {
+            background-color: #374151;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .scale-card:hover {
+            border-color: #4b5563;
+        }
+        .scale-card.selected-card {
+            border-color: #3b82f6;
+            background-color: #1e40af;
+            box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+        }
+        .card-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+            margin-top: 0;
+        }
+        .card-details.visible {
             margin-top: 1rem;
         }
-        th, td {
-            padding: 0.5rem;
-            text-align: left;
-            border-bottom: 1px solid #374151;
-            vertical-align: top;
-            font-size: 0.9rem;
+        .details-button {
+            background-color: #4b5563;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.8rem;
+            border-radius: 9999px;
         }
-        th {
-            background-color: #374151;
-            font-weight: 600;
-        }
-        tr.selected-row {
-            background-color: #3b82f6;
-        }
-        tr.selected-row, tr.selected-row .text-gray-400 {
-            color: #ffffff;
-        }
-        tr:last-child td { border-bottom: none; }
         .example-box {
-            background-color: #374151;
+            background-color: #111827;
             padding: 0.5rem;
             border-radius: 8px;
             margin-top: 0.5rem;
@@ -158,8 +167,8 @@
 
         /* Fretboard Visualizer Styles */
         .visualizer-container {
-            background-color: #111827;
-            padding: 1rem 0;
+            background-color: #1f2937;
+            padding: 1rem;
             border-radius: 8px;
             margin-top: 1.5rem;
             width: 100%;
@@ -397,23 +406,17 @@
                 <select id="chord-type"></select>
                 <button id="enharmonic-btn" class="action-button">Enarmónico</button>
             </div>
-            <div id="simple-mode-content">
-                <table class="bg-gray-800 rounded-lg overflow-hidden">
-                    <thead>
-                        <tr>
-                            <th class="rounded-tl-lg">Pentatónica a usar</th>
-                            <th>Tríadas Derivadas</th>
-                            <th>Tétradas Derivadas</th>
-                            <th>Grados sobre el Acorde</th>
-                            <th class="rounded-tr-lg">Lógica y Sonido</th>
-                        </tr>
-                    </thead>
-                    <tbody id="scale-table-body">
-                    </tbody>
-                </table>
-                
-                <div class="mt-8 p-4 bg-gray-800 rounded-lg">
-                    <h3 class="text-xl font-semibold mb-2 text-center">Laboratorio de Melodías y Arpegios</h3>
+            
+            <div class="mt-4" id="scale-cards-container">
+                <!-- Scale cards will be injected here by JavaScript -->
+            </div>
+            
+            <hr class="border-gray-700 my-6">
+
+            <div id="interactive-tools">
+                 <h3 class="text-xl font-semibold mb-4 text-center">Herramientas Interactivas</h3>
+                <div class="p-4 bg-gray-800 rounded-lg">
+                    <h4 class="text-lg font-semibold mb-2 text-center">Laboratorio de Melodías</h4>
                      <div class="input-group">
                         <label for="bpm-slider" class="font-semibold">Metrónomo:</label>
                         <input type="range" id="bpm-slider" min="40" max="300" value="120" class="flex-grow">
@@ -781,12 +784,9 @@
 
 
         // --- DOM Elements ---
-        // Simple Tab
         const rootNoteSelect = document.getElementById('root-note');
         const chordTypeSelect = document.getElementById('chord-type');
-        const tableBody = document.getElementById('scale-table-body');
-        
-        // Progression Tab
+        const cardsContainer = document.getElementById('scale-cards-container');
         const progressionKeySelect = document.getElementById('progression-key');
         const progressionContainer = document.getElementById('progression-container');
 
@@ -864,7 +864,7 @@
 
             const fretNumbersContainer = document.createElement('div');
             fretNumbersContainer.className = 'fret-numbers';
-            const numbers = { 3: '3', 5: '5', 7: '7', 9: '9', 12: '12', 15: '15' };
+            const numbers = { 3: '3', 5: '5', 7: '7', 9: '9', 12: '12' };
             const nutSpacer = document.createElement('div');
             nutSpacer.style.width = '10px'; 
             nutSpacer.style.flexShrink = '0';
@@ -920,7 +920,7 @@
             const rootNote = rootNoteSelect.value;
             const chordType = chordTypeSelect.value;
             const preferredNotes = getPreferredNotes(rootNote, chordType);
-            tableBody.innerHTML = '';
+            cardsContainer.innerHTML = '';
             
             (pentatonicToChordRelations[chordType] || []).forEach(rel => {
                 const pentatonicRootIndex = rel.pentatonicRoot(noteNameToIndex(rootNote));
@@ -929,40 +929,69 @@
                 const degrees = pentatonicNotes.map(note => getIntervalName(rootNote, note, chordType));
                 
                 const arpeggios = getArpeggiosForPentatonic(pentatonicNotes, rel.type);
-                const triadasHtml = `<td data-arpeggios='${JSON.stringify(arpeggios.triadas)}'><div class="example-box">${arpeggios.triadas.join('\n')}</div></td>`;
-                const tetradasHtml = `<td data-arpeggios='${JSON.stringify(arpeggios.tetradas)}'><div class="example-box">${arpeggios.tetradas.join('\n')}</div></td>`;
+                const triadasHtml = `<div class="example-box">${arpeggios.triadas.join('\n')}</div>`;
+                const tetradasHtml = `<div class="example-box">${arpeggios.tetradas.join('\n')}</div>`;
 
-                const row = document.createElement('tr');
-                row.dataset.notes = pentatonicNotes.join(',');
-                row.dataset.root = pentatonicRoot;
-                row.dataset.type = rel.type;
+                const card = document.createElement('div');
+                card.className = 'scale-card';
+                card.dataset.notes = pentatonicNotes.join(',');
+                card.dataset.root = pentatonicRoot;
+                card.dataset.type = rel.type;
                 const displayName = PENTATONIC_DISPLAY_NAMES[rel.type] || rel.type;
 
-                row.innerHTML = `
-                    <td>
-                        <div class="font-bold text-lg">${pentatonicRoot} <span class="text-sm text-gray-400">${displayName}</span></div>
-                        <div class="text-xs mt-1">${pentatonicNotes.join(', ')}</div>
-                    </td>
-                    ${triadasHtml} ${tetradasHtml}
-                    <td><div class="example-box">${degrees.join(', ')}</div></td>
-                    <td>${rel.logic}</td>
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-bold text-lg">${pentatonicRoot} <span class="text-sm text-gray-400">${displayName}</span></div>
+                            <div class="text-xs mt-1">${pentatonicNotes.join(', ')}</div>
+                        </div>
+                        <button class="details-button">Detalles</button>
+                    </div>
+                    <div class="card-details">
+                        <h5 class="font-semibold mt-2">Lógica:</h5>
+                        <p class="text-sm text-gray-400">${rel.logic}</p>
+                        <h5 class="font-semibold mt-2">Grados sobre Acorde:</h5>
+                        <div class="example-box">${degrees.join(', ')}</div>
+                        <h5 class="font-semibold mt-2">Triadas Derivadas:</h5>
+                        ${triadasHtml}
+                        <h5 class="font-semibold mt-2">Tétradas Derivadas:</h5>
+                        ${tetradasHtml}
+                    </div>
                 `;
-                row.addEventListener('click', (e) => {
-                    document.querySelectorAll('#scale-table-body tr').forEach(r => r.classList.remove('selected-row'));
-                    e.currentTarget.classList.add('selected-row');
-                    updateFretboardAndArpeggios(e.currentTarget);
-                    melodyLabs.simple.randomPart = [];
-                    melodyLabs.simple.arpeggioPart = [];
-                    updateMelodyDisplay('simple');
+                
+                card.addEventListener('click', (e) => {
+                    // Handle card selection
+                    if (!e.target.classList.contains('details-button')) {
+                        document.querySelectorAll('.scale-card').forEach(c => c.classList.remove('selected-card'));
+                        card.classList.add('selected-card');
+                        updateFretboardAndArpeggios(card);
+                        melodyLabs.simple.randomPart = [];
+                        melodyLabs.simple.arpeggioPart = [];
+                        updateMelodyDisplay('simple');
+                    }
                 });
-                tableBody.appendChild(row);
+
+                card.querySelector('.details-button').addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent card selection when clicking button
+                    const details = card.querySelector('.card-details');
+                    const isVisible = details.classList.toggle('visible');
+                    if (isVisible) {
+                        details.style.maxHeight = details.scrollHeight + 'px';
+                    } else {
+                        details.style.maxHeight = '0px';
+                    }
+                });
+
+                cardsContainer.appendChild(card);
             });
-            if (tableBody.firstChild) tableBody.firstChild.click();
+            if (cardsContainer.firstChild) {
+                 setTimeout(() => cardsContainer.firstChild.click(), 100);
+            }
         };
 
-        const updateFretboardAndArpeggios = (row) => {
-            const currentRoot = row.dataset.root;
-            const currentNotes = row.dataset.notes.split(',');
+        const updateFretboardAndArpeggios = (card) => {
+            const currentRoot = card.dataset.root;
+            const currentNotes = card.dataset.notes.split(',');
             const hasSharp = currentNotes.some(n => n.includes('#') && !n.includes('b'));
             const currentPreferred = hasSharp ? SHARP_NOTES : FLAT_NOTES;
             updateFretboard('fretboard-container-simple', currentRoot, currentNotes, currentPreferred);
@@ -988,16 +1017,10 @@
                 btn.addEventListener('click', async () => { if (!isToneStarted) { await Tone.start(); isToneStarted = true; } });
             });
 
-            rootNoteSelect.addEventListener('change', () => {
-                melodyLabs.simple.randomPart = []; melodyLabs.simple.arpeggioPart = [];
-                updateMelodyDisplay('simple'); renderSimpleMode();
-            });
-            chordTypeSelect.addEventListener('change', () => {
-                melodyLabs.simple.randomPart = []; melodyLabs.simple.arpeggioPart = [];
-                updateMelodyDisplay('simple'); renderSimpleMode();
-            });
+            rootNoteSelect.addEventListener('change', renderSimpleMode);
+            chordTypeSelect.addEventListener('change', renderSimpleMode);
 
-            document.getElementById('enharmonic-btn').addEventListener('click', () => handleEnharmonicClick('simple'));
+            document.getElementById('enharmonic-btn').addEventListener('click', () => handleEnharmonicClick());
             document.getElementById('enharmonic-btn-prog').addEventListener('click', () => {
                 const selectedLi = document.querySelector('#progression-container li.selected-scale');
                 if (selectedLi) {
@@ -1043,7 +1066,6 @@
                     updateFretboard('fretboard-container-progression', root, notes, preferredNotes);
                     populateArpeggioSelector('prog');
                     document.getElementById('arpeggio-select-prog').disabled = false;
-
                 }
             });
 
@@ -1083,29 +1105,18 @@
         }
 
 
-        function handleEnharmonicClick(labKey) {
-            const selectedRow = document.querySelector('#scale-table-body .selected-row');
-            if (!selectedRow) return;
+        function handleEnharmonicClick() {
+            const selectedCard = document.querySelector('.scale-card.selected-card');
+            if (!selectedCard) return;
 
-            const currentNotes = selectedRow.dataset.notes.split(',').map(note => ENHARMONIC_MAP[note] || note);
-            const currentRoot = ENHARMONIC_MAP[selectedRow.dataset.root] || selectedRow.dataset.root;
-            const type = selectedRow.dataset.type;
-
-            selectedRow.dataset.notes = currentNotes.join(',');
-            selectedRow.dataset.root = currentRoot;
-
-            const displayName = PENTATONIC_DISPLAY_NAMES[type] || type;
-            selectedRow.querySelector('.font-bold').innerHTML = `${currentRoot} <span class="text-sm text-gray-400">${displayName}</span>`;
-            selectedRow.querySelector('.text-xs').textContent = currentNotes.join(', ');
+            const currentNotes = selectedCard.dataset.notes.split(',').map(note => ENHARMONIC_MAP[note] || note);
+            const currentRoot = ENHARMONIC_MAP[selectedCard.dataset.root] || selectedCard.dataset.root;
             
-            const arpeggios = getArpeggiosForPentatonic(currentNotes, type);
-            const cells = selectedRow.getElementsByTagName('td');
-            cells[1].dataset.arpeggios = JSON.stringify(arpeggios.triadas);
-            cells[1].querySelector('.example-box').textContent = arpeggios.triadas.join('\n');
-            cells[2].dataset.arpeggios = JSON.stringify(arpeggios.tetradas);
-            cells[2].querySelector('.example-box').textContent = arpeggios.tetradas.join('\n');
+            selectedCard.dataset.notes = currentNotes.join(',');
+            selectedCard.dataset.root = currentRoot;
             
-            updateFretboardAndArpeggios(selectedRow);
+            // Re-render the entire list of cards to update all the text correctly
+            renderSimpleMode();
         }
 
         function setupMelodyLab(labKey) {
@@ -1119,31 +1130,35 @@
             const stopBtn = document.getElementById(`stop-melody-btn${suffix}`);
             const clearBtn = document.getElementById(`clear-melody-btn${suffix}`);
             
-            bpmSlider.addEventListener('input', (e) => {
-                const newBpm = e.target.value;
-                Tone.Transport.bpm.value = newBpm;
-                bpmValue.textContent = `${newBpm} BPM`;
-            });
-            Tone.Transport.bpm.value = bpmSlider.value;
+            if(bpmSlider) {
+                bpmSlider.addEventListener('input', (e) => {
+                    const newBpm = e.target.value;
+                    Tone.Transport.bpm.value = newBpm;
+                    bpmValue.textContent = `${newBpm} BPM`;
+                });
+                Tone.Transport.bpm.value = bpmSlider.value;
+            }
 
-            arpeggioTypeSelect.addEventListener('change', () => populateArpeggioSelector(labKey));
-            addArpeggioBtn.addEventListener('click', () => addArpeggioToMelody(labKey));
-            addRandomBtn.addEventListener('click', () => addRandomNotesToMelody(labKey));
-            playMelodyBtn.addEventListener('click', () => playMelody(labKey));
-            stopBtn.addEventListener('click', stopPlayback);
-            clearBtn.addEventListener('click', () => {
+            if(arpeggioTypeSelect) arpeggioTypeSelect.addEventListener('change', () => populateArpeggioSelector(labKey));
+            if(addArpeggioBtn) addArpeggioBtn.addEventListener('click', () => addArpeggioToMelody(labKey));
+            if(addRandomBtn) addRandomBtn.addEventListener('click', () => addRandomNotesToMelody(labKey));
+            if(playMelodyBtn) playMelodyBtn.addEventListener('click', () => playMelody(labKey));
+            if(stopBtn) stopBtn.addEventListener('click', stopPlayback);
+            if(clearBtn) clearBtn.addEventListener('click', () => {
                 melodyLabs[labKey].randomPart = [];
                 melodyLabs[labKey].arpeggioPart = [];
                 updateMelodyDisplay(labKey);
             });
             if(labKey === 'simple') {
-                 document.getElementById('play-arpeggios-btn').addEventListener('click', () => playArpeggios('simple'));
+                 const playArpeggiosBtn = document.getElementById('play-arpeggios-btn');
+                 if(playArpeggiosBtn) playArpeggiosBtn.addEventListener('click', () => playArpeggios('simple'));
             }
         }
         
         function updateMelodyDisplay(labKey) {
             const suffix = labKey === 'prog' ? '-prog' : '';
             const generatorOutput = document.getElementById(`generator-output${suffix}`);
+            if(!generatorOutput) return;
             const fullMelody = [...melodyLabs[labKey].randomPart, ...melodyLabs[labKey].arpeggioPart];
             generatorOutput.textContent = fullMelody.length > 0 ? fullMelody.join(' - ') : '';
         }
@@ -1151,11 +1166,12 @@
         function populateArpeggioSelector(labKey) {
             const suffix = labKey === 'prog' ? '-prog' : '';
             const arpeggioSelect = document.getElementById(`arpeggio-select${suffix}`);
+            if(!arpeggioSelect) return;
             arpeggioSelect.innerHTML = '';
             
             let sourceElement;
             if (labKey === 'simple') {
-                sourceElement = document.querySelector('#scale-table-body .selected-row');
+                sourceElement = document.querySelector('.scale-card.selected-card');
             } else { // prog
                 sourceElement = document.querySelector('#progression-container li.selected-scale');
             }
@@ -1181,11 +1197,13 @@
         
         function addArpeggioToMelody(labKey) {
             const suffix = labKey === 'prog' ? '-prog' : '';
-            const arpString = document.getElementById(`arpeggio-select${suffix}`).value;
-            if (!arpString) return;
+            const arpeggioSelect = document.getElementById(`arpeggio-select${suffix}`);
+            if (!arpeggioSelect || !arpeggioSelect.value) return;
+            const arpString = arpeggioSelect.value;
             
             let arpeggioNotes = arpString.split(':')[1].trim().split(', ');
-            if(document.getElementById(`arpeggio-random-order${suffix}`).checked) {
+            const randomOrderCheckbox = document.getElementById(`arpeggio-random-order${suffix}`);
+            if(randomOrderCheckbox && randomOrderCheckbox.checked) {
                 arpeggioNotes.sort(() => 0.5 - Math.random());
             }
 
@@ -1196,10 +1214,11 @@
         function addRandomNotesToMelody(labKey) {
             const suffix = labKey === 'prog' ? '-prog' : '';
             const generatorOutput = document.getElementById(`generator-output${suffix}`);
+            if(!generatorOutput) return;
 
             let sourceElement;
             if(labKey === 'simple') {
-                sourceElement = document.querySelector('#scale-table-body .selected-row');
+                sourceElement = document.querySelector('.scale-card.selected-card');
             } else {
                 sourceElement = document.querySelector('#progression-container li.selected-scale');
             }
@@ -1211,7 +1230,8 @@
             }
 
             const scaleNotes = sourceElement.dataset.notes.split(',');
-            const count = parseInt(document.getElementById(`random-note-count${suffix}`).value, 10);
+            const countInput = document.getElementById(`random-note-count${suffix}`);
+            const count = countInput ? parseInt(countInput.value, 10) : 3;
             
             if (isNaN(count) || count < 1 || count > 5) {
                 generatorOutput.textContent = "Número de notas debe ser entre 1 y 5.";
@@ -1231,8 +1251,10 @@
 
             const suffix = labKey === 'prog' ? '-prog' : '';
             const generatorOutput = document.getElementById(`generator-output${suffix}`);
-            const rhythm = document.getElementById(`rhythm-select${suffix}`).value;
+            const rhythmSelect = document.getElementById(`rhythm-select${suffix}`);
+            if(!generatorOutput || !rhythmSelect) return;
 
+            const rhythm = rhythmSelect.value;
             const melodyString = fullMelody.join(' - ');
             const notesWithOctaves = assignOctaves(fullMelody);
             
@@ -1277,15 +1299,16 @@
         
         function playArpeggios() {
             stopPlayback();
-            const selectedRow = document.querySelector('#scale-table-body .selected-row');
-            if (!selectedRow) return;
+            const selectedCard = document.querySelector('.scale-card.selected-card');
+            if (!selectedCard) return;
 
             const type = document.getElementById('arpeggio-type-select').value;
-            const cellIndex = type === 'triads' ? 1 : 2;
-            const arpeggioCell = selectedRow.cells[cellIndex];
-            if (!arpeggioCell || !arpeggioCell.dataset.arpeggios) return;
+            const pentatonicNotes = selectedCard.dataset.notes.split(',');
+            const pentatonicType = selectedCard.dataset.type;
 
-            const arpeggiosRaw = JSON.parse(arpeggioCell.dataset.arpeggios);
+            const arpeggios = getArpeggiosForPentatonic(pentatonicNotes, pentatonicType);
+            const arpeggiosRaw = type === 'triads' ? arpeggios.triadas : arpeggios.tetradas;
+            
             const arpeggiosNotes = arpeggiosRaw.map(arp => arp.split(':')[1].trim().split(', '));
             const rhythm = document.getElementById('rhythm-select').value;
             
