@@ -972,7 +972,6 @@
                 `;
                 
                 card.addEventListener('click', (e) => {
-                    // Handle card selection
                     if (!e.target.classList.contains('details-button')) {
                         document.querySelectorAll('.scale-card').forEach(c => c.classList.remove('selected-card'));
                         card.classList.add('selected-card');
@@ -1120,7 +1119,44 @@
         function handleEnharmonicClick() {
             const selectedCard = document.querySelector('.scale-card.selected-card');
             if (!selectedCard) return;
-            renderSimpleMode();
+
+            // --- 1. Get data & transform ---
+            const currentNotes = selectedCard.dataset.notes.split(',');
+            const currentRoot = selectedCard.dataset.root;
+            const pentatonicType = selectedCard.dataset.type;
+            const rootNoteForDegrees = rootNoteSelect.value;
+            const chordTypeForDegrees = chordTypeSelect.value;
+            
+            const newNotes = currentNotes.map(note => ENHARMONIC_MAP[note] || note);
+            const newRoot = ENHARMONIC_MAP[currentRoot] || currentRoot;
+
+            // --- 2. Update card data attributes ---
+            selectedCard.dataset.notes = newNotes.join(',');
+            selectedCard.dataset.root = newRoot;
+
+            // --- 3. Update card visual text ---
+            const displayName = PENTATONIC_DISPLAY_NAMES[pentatonicType] || pentatonicType;
+            selectedCard.querySelector('.font-bold').innerHTML = `${newRoot} <span class="text-sm text-gray-400">${displayName}</span>`;
+            selectedCard.querySelector('.text-xs').textContent = newNotes.join(', ');
+
+            const detailsContainer = selectedCard.querySelector('.card-details');
+            const degrees = newNotes.map(note => getIntervalName(rootNoteForDegrees, note, chordTypeForDegrees));
+            const arpeggios = getArpeggiosForPentatonic(newNotes, pentatonicType);
+
+            const headers = detailsContainer.querySelectorAll('h5');
+            let gradosBox, triadasBox, tetradasBox;
+            headers.forEach(h => {
+                if(h.textContent.includes('Grados')) gradosBox = h.nextElementSibling;
+                if(h.textContent.includes('Triadas')) triadasBox = h.nextElementSibling;
+                if(h.textContent.includes('Tétradas')) tetradasBox = h.nextElementSibling;
+            });
+
+            if(gradosBox) gradosBox.textContent = degrees.join(', ');
+            if(triadasBox) triadasBox.innerHTML = arpeggios.triadas.join('\n');
+            if(tetradasBox) tetradasBox.innerHTML = arpeggios.tetradas.join('\n');
+
+            // --- 4. Update the interactive tools ---
+            updateFretboardAndArpeggios(selectedCard);
         }
 
         function setupMelodyLab(labKey) {
