@@ -164,7 +164,6 @@
             color: #ffffff !important;
         }
 
-
         /* Fretboard Visualizer Styles */
         .visualizer-container {
             background-color: #1f2937;
@@ -173,8 +172,8 @@
             margin-top: 1.5rem;
             width: 100%;
             overflow-x: auto;
-            text-align: center; /* Center the inline-block fretboard area */
-            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+            text-align: center;
+            -webkit-overflow-scrolling: touch;
         }
         .fretboard-area {
             display: inline-flex;
@@ -248,7 +247,7 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            pointer-events: none; /* So the click goes to the parent fret */
+            pointer-events: none;
         }
         .note-fixed.in-scale {
             background-color: #3b82f6;
@@ -257,7 +256,7 @@
         }
         .note-fixed.root { background-color: #ef4444; }
         .note-fixed.playing {
-            box-shadow: 0 0 15px 5px #fef08a; /* Yellow glow */
+            box-shadow: 0 0 15px 5px #fef08a;
             transform: scale(1.2);
         }
         .open-string-name.playing {
@@ -302,7 +301,7 @@
         }
         .fret-numbers {
             display: flex;
-            margin-left: 18px; /* open-strings width + nut width */
+            margin-left: 18px;
             padding-top: 4px;
         }
         .fret-number {
@@ -354,10 +353,24 @@
             transform: scale(1.1);
         }
 
+        /* Desktop Layout */
+        @media (min-width: 1024px) {
+            #simple-mode-content {
+                display: grid;
+                grid-template-columns: 40% 60%;
+                gap: 1.5rem;
+                align-items: start;
+            }
+             #scale-cards-container{
+                max-height: 80vh;
+                overflow-y: auto;
+             }
+        }
+
         /* Mobile Optimizations */
         @media (max-width: 768px) {
             .fret, .inlay-fret, .fret-number {
-                width: 40px; /* Reduce fret width on smaller screens */
+                width: 40px;
             }
             .note-fixed {
                 width: 18px;
@@ -368,7 +381,7 @@
         
         @media (max-width: 480px) {
             .fret, .inlay-fret, .fret-number {
-                width: 32px; /* Even smaller for phones */
+                width: 32px;
             }
             .note-fixed {
                 width: 16px;
@@ -379,7 +392,6 @@
                 font-size: 0.8rem;
              }
         }
-
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200">
@@ -407,56 +419,56 @@
                 <button id="enharmonic-btn" class="action-button">Enarmónico</button>
             </div>
             
-            <div class="mt-4" id="scale-cards-container">
-                <!-- Scale cards will be injected here by JavaScript -->
-            </div>
-            
-            <hr class="border-gray-700 my-6">
-
-            <div id="interactive-tools">
-                 <h3 class="text-xl font-semibold mb-4 text-center">Herramientas Interactivas</h3>
-                <div class="p-4 bg-gray-800 rounded-lg">
-                    <h4 class="text-lg font-semibold mb-2 text-center">Laboratorio de Melodías</h4>
-                     <div class="input-group">
-                        <label for="bpm-slider" class="font-semibold">Metrónomo:</label>
-                        <input type="range" id="bpm-slider" min="40" max="300" value="120" class="flex-grow">
-                        <span id="bpm-value" class="font-bold w-12 text-center bg-gray-700 rounded-md py-1">120 BPM</span>
-                    </div>
-                    <div class="input-group">
-                        <select id="arpeggio-type-select">
-                            <option value="triads">Tríadas</option>
-                            <option value="tetrads">Tétradas</option>
-                        </select>
-                        <select id="arpeggio-select" class="flex-grow"></select>
-                        <button id="add-arpeggio-btn" class="action-button">Agregar/Actualizar Arpegio</button>
-                        <div class="flex items-center">
-                            <input type="checkbox" id="arpeggio-random-order">
-                            <label for="arpeggio-random-order" class="ml-2">Orden Aleatorio</label>
+            <div id="simple-mode-content">
+                <div class="mt-4" id="scale-cards-container">
+                    <!-- Scale cards will be injected here -->
+                </div>
+                
+                <div id="interactive-tools">
+                     <h3 class="text-xl font-semibold mb-4 text-center hidden lg:block">Herramientas Interactivas</h3>
+                    <div class="p-4 bg-gray-800 rounded-lg mt-4 lg:mt-0">
+                        <h4 class="text-lg font-semibold mb-2 text-center">Laboratorio de Melodías</h4>
+                         <div class="input-group">
+                            <label for="bpm-slider" class="font-semibold">Metrónomo:</label>
+                            <input type="range" id="bpm-slider" min="40" max="300" value="120" class="flex-grow">
+                            <span id="bpm-value" class="font-bold w-12 text-center bg-gray-700 rounded-md py-1">120 BPM</span>
+                        </div>
+                        <div class="input-group">
+                            <select id="arpeggio-type-select">
+                                <option value="triads">Tríadas</option>
+                                <option value="tetrads">Tétradas</option>
+                            </select>
+                            <select id="arpeggio-select" class="flex-grow"></select>
+                            <button id="add-arpeggio-btn" class="action-button">Agregar/Actualizar Arpegio</button>
+                            <div class="flex items-center">
+                                <input type="checkbox" id="arpeggio-random-order">
+                                <label for="arpeggio-random-order" class="ml-2">Orden Aleatorio</label>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="rhythm-select" class="font-semibold">Ritmo:</label>
+                            <select id="rhythm-select">
+                                <option value="4n">Negra</option>
+                                <option value="8n" selected>Corchea</option>
+                                <option value="16n">Semicorchea</option>
+                            </select>
+                            <label for="random-note-count" class="ml-4">Notas Aleatorias (1-5):</label>
+                            <input type="number" id="random-note-count" min="1" max="5" value="3" class="w-20 text-center">
+                            <button id="add-random-btn" class="action-button bg-yellow-600 hover:bg-yellow-500">Generar Aleatorio</button>
+                        </div>
+                        <div id="generator-output" class="text-center font-mono text-lg p-4 bg-gray-900 rounded-lg min-h-[3rem] flex items-center justify-center mb-4">
+                            <!-- Melody will appear here -->
+                        </div>
+                        <div class="input-group">
+                            <button id="play-melody-btn" class="action-button">Play Melodía</button>
+                            <button id="play-arpeggios-btn" class="action-button bg-green-600 hover:bg-green-500">Play Arpegios</button>
+                            <button id="stop-melody-btn" class="action-button stop-btn">Stop</button>
+                            <button id="clear-melody-btn" class="action-button bg-gray-600 hover:bg-gray-500">Limpiar</button>
                         </div>
                     </div>
-                    <div class="input-group">
-                        <label for="rhythm-select" class="font-semibold">Ritmo:</label>
-                        <select id="rhythm-select">
-                            <option value="4n">Negra</option>
-                            <option value="8n" selected>Corchea</option>
-                            <option value="16n">Semicorchea</option>
-                        </select>
-                        <label for="random-note-count" class="ml-4">Notas Aleatorias (1-5):</label>
-                        <input type="number" id="random-note-count" min="1" max="5" value="3" class="w-20 text-center">
-                        <button id="add-random-btn" class="action-button bg-yellow-600 hover:bg-yellow-500">Generar Aleatorio</button>
-                    </div>
-                    <div id="generator-output" class="text-center font-mono text-lg p-4 bg-gray-900 rounded-lg min-h-[3rem] flex items-center justify-center mb-4">
-                        <!-- Melody will appear here -->
-                    </div>
-                    <div class="input-group">
-                        <button id="play-melody-btn" class="action-button">Play Melodía</button>
-                        <button id="play-arpeggios-btn" class="action-button bg-green-600 hover:bg-green-500">Play Arpegios</button>
-                        <button id="stop-melody-btn" class="action-button stop-btn">Stop</button>
-                        <button id="clear-melody-btn" class="action-button bg-gray-600 hover:bg-gray-500">Limpiar</button>
-                    </div>
-                </div>
 
-                <div class="visualizer-container" id="fretboard-container-simple">
+                    <div class="visualizer-container" id="fretboard-container-simple">
+                    </div>
                 </div>
             </div>
         </div>
@@ -846,7 +858,7 @@
             
             const inlayContainer = document.createElement('div');
             inlayContainer.className = 'inlay-container';
-            const markers = { 3: 'single', 5: 'single', 7: 'single', 9: 'single', 12: 'double', 15: 'single', 17: 'single' };
+            const markers = { 3: 'single', 5: 'single', 7: 'single', 9: 'single', 12: 'double' };
             
             for (let i = 1; i <= numFrets; i++) {
                 const inlayFret = document.createElement('div');
@@ -972,7 +984,7 @@
                 });
 
                 card.querySelector('.details-button').addEventListener('click', (e) => {
-                    e.stopPropagation(); // Prevent card selection when clicking button
+                    e.stopPropagation();
                     const details = card.querySelector('.card-details');
                     const isVisible = details.classList.toggle('visible');
                     if (isVisible) {
@@ -1108,14 +1120,6 @@
         function handleEnharmonicClick() {
             const selectedCard = document.querySelector('.scale-card.selected-card');
             if (!selectedCard) return;
-
-            const currentNotes = selectedCard.dataset.notes.split(',').map(note => ENHARMONIC_MAP[note] || note);
-            const currentRoot = ENHARMONIC_MAP[selectedCard.dataset.root] || selectedCard.dataset.root;
-            
-            selectedCard.dataset.notes = currentNotes.join(',');
-            selectedCard.dataset.root = currentRoot;
-            
-            // Re-render the entire list of cards to update all the text correctly
             renderSimpleMode();
         }
 
